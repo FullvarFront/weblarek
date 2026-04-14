@@ -169,13 +169,10 @@ interface IBuyer {
 Описывает объект с ошибками валидации данных покупателя. Каждое поле соответствует одноимённому полю `IBuyer` и необязательно: присутствует в объекте только если поле не прошло валидацию. Значение — текст ошибки.
 
 ```ts
-type TBuyerErrors = {
-  payment?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-};
+type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 ```
+
+Тип выводится автоматически из `IBuyer`: `keyof IBuyer` даёт набор имён полей, `Record<..., string>` строит объект с теми же ключами и строковыми значениями, а `Partial` делает все поля необязательными. При добавлении новых полей в `IBuyer` тип ошибок обновится автоматически.
 
 #### IProductsList
 

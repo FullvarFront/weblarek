@@ -3,7 +3,7 @@ import {
   IProductsList,
   IOrderRequest,
   IOrderResponse,
-} from "../../types";
+} from "../types";
 
 export class WebLarekApi {
   constructor(protected api: IApi) {}

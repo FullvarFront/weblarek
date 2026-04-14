@@ -1,11 +1,6 @@
-import { IBuyer, TPayment } from "../../../types";
+import { IBuyer, TPayment } from "../../types";
 
-type TBuyerErrors = {
-  payment?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-};
+type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 
 export class Buyer {
   protected payment: TPayment = "";
