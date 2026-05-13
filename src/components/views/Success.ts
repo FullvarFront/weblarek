@@ -1,7 +1,11 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 
-export class Success<T> extends Component<T> {
+export interface ISuccess {
+  total: number;
+}
+
+export class Success extends Component<ISuccess> {
   protected descriptionElement: HTMLElement;
   protected closeButton: HTMLButtonElement;
 
@@ -24,7 +28,7 @@ export class Success<T> extends Component<T> {
     });
   }
 
-  setTotal(value: number): void {
+  set total(value: number) {
     this.descriptionElement.textContent = `Списано ${value} синапсов`;
   }
 }

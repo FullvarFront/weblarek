@@ -1,8 +1,12 @@
-import { Form } from "./Form";
+import { Form, IForm } from "./Form";
 import { IEvents } from "../base/Events";
 import { TPayment } from "../../types";
 
-export class FormOrder<T> extends Form<T> {
+export interface IFormOrder extends IForm {
+  payment: TPayment;
+}
+
+export class FormOrder extends Form<IFormOrder> {
   protected paymentButtons: HTMLButtonElement[];
 
   constructor(container: HTMLFormElement, events: IEvents) {
@@ -20,7 +24,7 @@ export class FormOrder<T> extends Form<T> {
     });
   }
 
-  setPayment(value: TPayment): void {
+  set payment(value: TPayment) {
     this.paymentButtons.forEach((button) => {
       button.classList.toggle("button_alt-active", button.name === value);
     });

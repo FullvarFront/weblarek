@@ -1,7 +1,13 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 
-export class Basket<T> extends Component<T> {
+export interface IBasketView {
+  items: HTMLElement[];
+  total: number;
+  valid: boolean;
+}
+
+export class Basket extends Component<IBasketView> {
   protected listElement: HTMLElement;
   protected totalElement: HTMLElement;
   protected submitButton: HTMLButtonElement;
@@ -25,7 +31,7 @@ export class Basket<T> extends Component<T> {
     });
   }
 
-  setItems(items: HTMLElement[]): void {
+  set items(items: HTMLElement[]) {
     if (items.length === 0) {
       const empty = document.createElement("p");
       empty.textContent = "Корзина пуста";
@@ -35,11 +41,11 @@ export class Basket<T> extends Component<T> {
     }
   }
 
-  setTotal(value: number): void {
+  set total(value: number) {
     this.totalElement.textContent = `${value} синапсов`;
   }
 
-  setValid(isValid: boolean): void {
+  set valid(isValid: boolean) {
     this.submitButton.disabled = !isValid;
   }
 }

@@ -1,8 +1,13 @@
-import { Card } from "./Card";
+import { Card, ICard } from "./Card";
 import { IEvents } from "../base/Events";
 import { categoryMap } from "../../utils/constants";
 
-export class CardCatalog<T> extends Card<T> {
+export interface ICardCatalog extends ICard {
+  image: string;
+  category: keyof typeof categoryMap;
+}
+
+export class CardCatalog extends Card<ICardCatalog> {
   protected imageElement: HTMLImageElement;
   protected categoryElement: HTMLElement;
 
@@ -21,11 +26,11 @@ export class CardCatalog<T> extends Card<T> {
     });
   }
 
-  setImage(src: string, alt?: string): void {
-    super.setImage(this.imageElement, src, alt);
+  set image(value: string) {
+    this.imageElement.src = value;
   }
 
-  setCategory(value: keyof typeof categoryMap): void {
+  set category(value: keyof typeof categoryMap) {
     this.categoryElement.textContent = value;
     this.categoryElement.className = `card__category ${categoryMap[value]}`;
   }

@@ -25,7 +25,7 @@ export class Buyer {
       this.address = data.address;
     }
 
-    this.events.emit("buyer:changed", this.getData());
+    this.events.emit("buyer:changed");
   }
 
   getData(): IBuyer {
@@ -43,7 +43,7 @@ export class Buyer {
     this.email = "";
     this.phone = "";
 
-    this.events.emit("buyer:changed", this.getData());
+    this.events.emit("buyer:changed");
   }
 
   validate(): TBuyerErrors {

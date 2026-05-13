@@ -1,15 +1,13 @@
 import "./scss/styles.scss";
-import { IProduct } from "./types";
 import { Products } from "./components/models/Products";
 import { Basket } from "./components/models/Basket";
 import { Buyer } from "./components/models/Buyer";
 import { WebLarekApi } from "./components/Communication";
 import { Api } from "./components/base/Api";
 import { EventEmitter } from "./components/base/Events";
-import { API_URL } from "./utils/constants";
+import { API_URL, CDN_URL, categoryMap } from "./utils/constants";
 import { Gallery } from "./components/views/Gallery";
 import { CardCatalog } from "./components/views/CardCatalog";
-import { categoryMap, CDN_URL } from "./utils/constants";
 import { CardPreview } from "./components/views/CardPreview";
 import { Modal } from "./components/views/Modal";
 import { Header } from "./components/views/Header";
@@ -81,7 +79,8 @@ const successElement = successTemplate.content.firstElementChild!.cloneNode(
 ) as HTMLElement;
 const success = new Success(successElement, events);
 
-events.on("catalog:changed", (items: IProduct[]) => {
+events.on("catalog:changed", () => {
+  const items = productsModel.getItems();
   const cards = items.map((item) => {
     const cardElement = catalogTemplate.content.firstElementChild!.cloneNode(
       true,
@@ -89,15 +88,16 @@ events.on("catalog:changed", (items: IProduct[]) => {
 
     const card = new CardCatalog(cardElement, events);
 
-    card.setId(item.id);
-    card.setTitle(item.title);
-    card.setPrice(item.price);
-    card.setImage(CDN_URL + item.image, item.title);
-    card.setCategory(item.category as keyof typeof categoryMap);
-
-    return card.render();
+    return card.render({
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      image: CDN_URL + item.image,
+      category: item.category as keyof typeof categoryMap,
+    });
   });
-  gallery.setCatalog(cards);
+
+  gallery.render({ catalog: cards });
 });
 
 events.on("card:select", (data: { id: string }) => {
@@ -107,7 +107,8 @@ events.on("card:select", (data: { id: string }) => {
   }
 });
 
-events.on("preview:changed", (item: IProduct | null) => {
+events.on("preview:changed", () => {
+  const item = productsModel.getSelectedItem();
   if (!item) return;
 
   const previewElement = previewTemplate.content.firstElementChild!.cloneNode(
@@ -115,22 +116,26 @@ events.on("preview:changed", (item: IProduct | null) => {
   ) as HTMLElement;
   const preview = new CardPreview(previewElement, events);
 
-  preview.setId(item.id);
-  preview.setTitle(item.title);
-  preview.setPrice(item.price);
-  preview.setImage(CDN_URL + item.image, item.title);
-  preview.setCategory(item.category as keyof typeof categoryMap);
-  preview.setDescription(item.description);
-
+  let buttonState: "buy" | "remove" | "unavailable";
   if (item.price === null) {
-    preview.setButton("unavailable");
+    buttonState = "unavailable";
   } else if (basketModel.hasItem(item.id)) {
-    preview.setButton("remove");
+    buttonState = "remove";
   } else {
-    preview.setButton("buy");
+    buttonState = "buy";
   }
 
-  modal.setContent(preview.render());
+  const previewNode = preview.render({
+    id: item.id,
+    title: item.title,
+    price: item.price,
+    image: CDN_URL + item.image,
+    category: item.category as keyof typeof categoryMap,
+    description: item.description,
+    button: buttonState,
+  });
+
+  modal.render({ content: previewNode });
   modal.open();
 });
 
@@ -155,26 +160,29 @@ function renderBasket(): void {
       true,
     ) as HTMLElement;
     const card = new CardBasket(cardElement, events);
-    card.setId(item.id);
-    card.setTitle(item.title);
-    card.setPrice(item.price);
-    card.setIndex(index + 1);
-    return card.render();
+    return card.render({
+      id: item.id,
+      title: item.title,
+      price: item.price,
+      index: index + 1,
+    });
   });
 
-  basketView.setItems(cards);
-  basketView.setTotal(basketModel.getTotal());
-  basketView.setValid(items.length > 0);
+  basketView.render({
+    items: cards,
+    total: basketModel.getTotal(),
+    valid: items.length > 0,
+  });
 }
 
-events.on("basket:changed", (items: IProduct[]) => {
-  header.setCounter(items.length);
+events.on("basket:changed", () => {
+  header.render({ counter: basketModel.getCount() });
   renderBasket();
 });
 
 events.on("basket:open", () => {
   renderBasket();
-  modal.setContent(basketView.render());
+  modal.render({ content: basketView.render() });
   modal.open();
 });
 
@@ -186,7 +194,7 @@ events.on("basket:remove", (data: { id: string }) => {
 });
 
 events.on("order:open", () => {
-  modal.setContent(orderForm.render());
+  modal.render({ content: orderForm.render() });
   modal.open();
 });
 
@@ -198,24 +206,27 @@ events.on("buyer:changed", () => {
   const errors = buyerModel.validate();
   const data = buyerModel.getData();
 
-  orderForm.setPayment(data.payment);
-
   const orderErrors = [errors.payment, errors.address]
     .filter(Boolean)
     .join("; ");
-  orderForm.setErrors(orderErrors);
-  orderForm.setValid(!errors.payment && !errors.address);
+  orderForm.render({
+    payment: data.payment,
+    errors: orderErrors,
+    valid: !errors.payment && !errors.address,
+  });
 
   const contactsErrors = [errors.email, errors.phone]
     .filter(Boolean)
     .join("; ");
-  contactsForm.setErrors(contactsErrors);
-  contactsForm.setValid(!errors.email && !errors.phone);
+  contactsForm.render({
+    errors: contactsErrors,
+    valid: !errors.email && !errors.phone,
+  });
 });
 
 events.on("form:submit", (data: { form: string }) => {
   if (data.form === "order") {
-    modal.setContent(contactsForm.render());
+    modal.render({ content: contactsForm.render() });
     return;
   }
 
@@ -230,8 +241,7 @@ events.on("form:submit", (data: { form: string }) => {
     api
       .orderProducts(order)
       .then((response) => {
-        success.setTotal(response.total);
-        modal.setContent(success.render());
+        modal.render({ content: success.render({ total: response.total }) });
         basketModel.clear();
         buyerModel.clear();
         orderForm.clear();

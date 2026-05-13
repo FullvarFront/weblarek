@@ -1,7 +1,13 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 
-export abstract class Card<T> extends Component<T> {
+export interface ICard {
+  id: string;
+  title: string;
+  price: number | null;
+}
+
+export abstract class Card<T extends ICard> extends Component<T> {
   protected _id: string = "";
   protected titleElement: HTMLElement;
   protected priceElement: HTMLElement;
@@ -16,23 +22,16 @@ export abstract class Card<T> extends Component<T> {
     this.priceElement = container.querySelector(".card__price") as HTMLElement;
   }
 
-  setId(value: string): void {
+  set id(value: string) {
     this._id = value;
   }
 
-  getId(): string {
-    return this._id;
-  }
-
-  setTitle(value: string): void {
+  set title(value: string) {
     this.titleElement.textContent = value;
   }
 
-  setPrice(value: number | null): void {
-    if (value === null) {
-      this.priceElement.textContent = "Бесценно";
-    } else {
-      this.priceElement.textContent = `${value} синапсов`;
-    }
+  set price(value: number | null) {
+    this.priceElement.textContent =
+      value === null ? "Бесценно" : `${value} синапсов`;
   }
 }

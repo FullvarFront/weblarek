@@ -1,7 +1,9 @@
-import { Form } from "./Form";
+import { Form, IForm } from "./Form";
 import { IEvents } from "../base/Events";
 
-export class FormContacts<T> extends Form<T> {
+export type IFormContacts = IForm;
+
+export class FormContacts extends Form<IFormContacts> {
   constructor(container: HTMLFormElement, events: IEvents) {
     super(container, events);
   }

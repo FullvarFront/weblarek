@@ -1,7 +1,11 @@
-import { Card } from "./Card";
+import { Card, ICard } from "./Card";
 import { IEvents } from "../base/Events";
 
-export class CardBasket<T> extends Card<T> {
+export interface ICardBasket extends ICard {
+  index: number;
+}
+
+export class CardBasket extends Card<ICardBasket> {
   protected indexElement: HTMLElement;
   protected deleteButton: HTMLButtonElement;
 
@@ -21,7 +25,7 @@ export class CardBasket<T> extends Card<T> {
     });
   }
 
-  setIndex(value: number): void {
+  set index(value: number) {
     this.indexElement.textContent = String(value);
   }
 }

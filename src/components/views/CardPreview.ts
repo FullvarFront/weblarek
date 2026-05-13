@@ -1,8 +1,17 @@
-import { Card } from "./Card";
+import { Card, ICard } from "./Card";
 import { IEvents } from "../base/Events";
 import { categoryMap } from "../../utils/constants";
 
-export class CardPreview<T> extends Card<T> {
+export type TCardButtonState = "buy" | "remove" | "unavailable";
+
+export interface ICardPreview extends ICard {
+  image: string;
+  category: keyof typeof categoryMap;
+  description: string;
+  button: TCardButtonState;
+}
+
+export class CardPreview extends Card<ICardPreview> {
   protected imageElement: HTMLImageElement;
   protected categoryElement: HTMLElement;
   protected descriptionElement: HTMLElement;
@@ -32,20 +41,20 @@ export class CardPreview<T> extends Card<T> {
     });
   }
 
-  setImage(src: string, alt?: string): void {
-    super.setImage(this.imageElement, src, alt);
+  set image(value: string) {
+    this.imageElement.src = value;
   }
 
-  setCategory(value: keyof typeof categoryMap): void {
+  set category(value: keyof typeof categoryMap) {
     this.categoryElement.textContent = value;
     this.categoryElement.className = `card__category ${categoryMap[value]}`;
   }
 
-  setDescription(value: string): void {
+  set description(value: string) {
     this.descriptionElement.textContent = value;
   }
 
-  setButton(state: "buy" | "remove" | "unavailable"): void {
+  set button(state: TCardButtonState) {
     if (state === "buy") {
       this.buttonElement.textContent = "Купить";
       this.buttonElement.disabled = false;

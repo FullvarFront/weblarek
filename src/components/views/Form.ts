@@ -1,7 +1,12 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 
-export abstract class Form<T> extends Component<T> {
+export interface IForm {
+  valid: boolean;
+  errors: string;
+}
+
+export abstract class Form<T extends IForm> extends Component<T> {
   protected form: HTMLFormElement;
   protected submitButton: HTMLButtonElement;
   protected errorsElement: HTMLElement;
@@ -34,11 +39,11 @@ export abstract class Form<T> extends Component<T> {
     });
   }
 
-  setValid(isValid: boolean): void {
+  set valid(isValid: boolean) {
     this.submitButton.disabled = !isValid;
   }
 
-  setErrors(text: string): void {
+  set errors(text: string) {
     this.errorsElement.textContent = text;
   }
 
@@ -46,4 +51,3 @@ export abstract class Form<T> extends Component<T> {
     this.form.reset();
   }
 }
-

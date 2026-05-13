@@ -1,8 +1,12 @@
 import { Component } from "../base/Component";
 import { IEvents } from "../base/Events";
 
-export class Modal<T> extends Component<T> {
-  protected content: HTMLElement;
+export interface IModal {
+  content: HTMLElement;
+}
+
+export class Modal extends Component<IModal> {
+  protected contentElement: HTMLElement;
   protected closeButton: HTMLButtonElement;
 
   constructor(
@@ -11,7 +15,9 @@ export class Modal<T> extends Component<T> {
   ) {
     super(container);
 
-    this.content = container.querySelector(".modal__content") as HTMLElement;
+    this.contentElement = container.querySelector(
+      ".modal__content",
+    ) as HTMLElement;
     this.closeButton = container.querySelector(
       ".modal__close",
     ) as HTMLButtonElement;
@@ -27,8 +33,8 @@ export class Modal<T> extends Component<T> {
     });
   }
 
-  setContent(node: HTMLElement): void {
-    this.content.replaceChildren(node);
+  set content(node: HTMLElement) {
+    this.contentElement.replaceChildren(node);
   }
 
   open(): void {
