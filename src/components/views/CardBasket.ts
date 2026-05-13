@@ -1,16 +1,19 @@
 import { Card, ICard } from "./Card";
-import { IEvents } from "../base/Events";
 
 export interface ICardBasket extends ICard {
   index: number;
+}
+
+export interface ICardBasketActions {
+  onDelete: () => void;
 }
 
 export class CardBasket extends Card<ICardBasket> {
   protected indexElement: HTMLElement;
   protected deleteButton: HTMLButtonElement;
 
-  constructor(container: HTMLElement, events: IEvents) {
-    super(container, events);
+  constructor(container: HTMLElement, actions: ICardBasketActions) {
+    super(container);
 
     this.indexElement = container.querySelector(
       ".basket__item-index",
@@ -20,9 +23,7 @@ export class CardBasket extends Card<ICardBasket> {
       ".basket__item-delete",
     ) as HTMLButtonElement;
 
-    this.deleteButton.addEventListener("click", () => {
-      this.events.emit("basket:remove", { id: this._id });
-    });
+    this.deleteButton.addEventListener("click", actions.onDelete);
   }
 
   set index(value: number) {

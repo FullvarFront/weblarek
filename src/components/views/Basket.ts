@@ -32,13 +32,7 @@ export class Basket extends Component<IBasketView> {
   }
 
   set items(items: HTMLElement[]) {
-    if (items.length === 0) {
-      const empty = document.createElement("p");
-      empty.textContent = "Корзина пуста";
-      this.listElement.replaceChildren(empty);
-    } else {
-      this.listElement.replaceChildren(...items);
-    }
+    this.listElement.replaceChildren(...items);
   }
 
   set total(value: number) {

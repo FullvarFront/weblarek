@@ -44,6 +44,13 @@ const previewTemplate = document.querySelector(
 ) as HTMLTemplateElement;
 const modal = new Modal(modalElement, events);
 
+const previewElement = previewTemplate.content.firstElementChild!.cloneNode(
+  true,
+) as HTMLElement;
+const preview = new CardPreview(previewElement, {
+  onClick: () => events.emit("card:button-click"),
+});
+
 const headerElement = document.querySelector(".header") as HTMLElement;
 const header = new Header(headerElement, events);
 
@@ -56,6 +63,7 @@ const basketElement = basketTemplate.content.firstElementChild!.cloneNode(
   true,
 ) as HTMLElement;
 const basketView = new BasketView(basketElement, events);
+basketView.render({ items: [], total: 0, valid: false });
 
 const orderTemplate = document.querySelector("#order") as HTMLTemplateElement;
 const orderElement = orderTemplate.content.firstElementChild!.cloneNode(
@@ -86,10 +94,11 @@ events.on("catalog:changed", () => {
       true,
     ) as HTMLElement;
 
-    const card = new CardCatalog(cardElement, events);
+    const card = new CardCatalog(cardElement, {
+      onClick: () => events.emit("card:select", { id: item.id }),
+    });
 
     return card.render({
-      id: item.id,
       title: item.title,
       price: item.price,
       image: CDN_URL + item.image,
@@ -111,36 +120,33 @@ events.on("preview:changed", () => {
   const item = productsModel.getSelectedItem();
   if (!item) return;
 
-  const previewElement = previewTemplate.content.firstElementChild!.cloneNode(
-    true,
-  ) as HTMLElement;
-  const preview = new CardPreview(previewElement, events);
-
-  let buttonState: "buy" | "remove" | "unavailable";
+  let buttonText: string;
+  let buttonDisabled = false;
   if (item.price === null) {
-    buttonState = "unavailable";
+    buttonText = "Недоступно";
+    buttonDisabled = true;
   } else if (basketModel.hasItem(item.id)) {
-    buttonState = "remove";
+    buttonText = "Удалить из корзины";
   } else {
-    buttonState = "buy";
+    buttonText = "Купить";
   }
 
   const previewNode = preview.render({
-    id: item.id,
     title: item.title,
     price: item.price,
     image: CDN_URL + item.image,
     category: item.category as keyof typeof categoryMap,
     description: item.description,
-    button: buttonState,
+    button: buttonText,
+    buttonDisabled,
   });
 
   modal.render({ content: previewNode });
   modal.open();
 });
 
-events.on("card:button-click", (data: { id: string }) => {
-  const product = productsModel.getItemById(data.id);
+events.on("card:button-click", () => {
+  const product = productsModel.getSelectedItem();
   if (!product) return;
 
   if (basketModel.hasItem(product.id)) {
@@ -159,9 +165,12 @@ function renderBasket(): void {
     const cardElement = cardBasketTemplate.content.firstElementChild!.cloneNode(
       true,
     ) as HTMLElement;
-    const card = new CardBasket(cardElement, events);
+
+    const card = new CardBasket(cardElement, {
+      onDelete: () => events.emit("basket:remove", { id: item.id }),
+    });
+
     return card.render({
-      id: item.id,
       title: item.title,
       price: item.price,
       index: index + 1,
@@ -181,7 +190,6 @@ events.on("basket:changed", () => {
 });
 
 events.on("basket:open", () => {
-  renderBasket();
   modal.render({ content: basketView.render() });
   modal.open();
 });
@@ -211,6 +219,7 @@ events.on("buyer:changed", () => {
     .join("; ");
   orderForm.render({
     payment: data.payment,
+    address: data.address,
     errors: orderErrors,
     valid: !errors.payment && !errors.address,
   });
@@ -219,6 +228,8 @@ events.on("buyer:changed", () => {
     .filter(Boolean)
     .join("; ");
   contactsForm.render({
+    email: data.email,
+    phone: data.phone,
     errors: contactsErrors,
     valid: !errors.email && !errors.phone,
   });
@@ -244,8 +255,6 @@ events.on("form:submit", (data: { form: string }) => {
         modal.render({ content: success.render({ total: response.total }) });
         basketModel.clear();
         buyerModel.clear();
-        orderForm.clear();
-        contactsForm.clear();
       })
       .catch((err) => console.error("Ошибка оформления заказа:", err));
   }

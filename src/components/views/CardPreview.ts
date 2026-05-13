@@ -1,14 +1,16 @@
 import { Card, ICard } from "./Card";
-import { IEvents } from "../base/Events";
 import { categoryMap } from "../../utils/constants";
-
-export type TCardButtonState = "buy" | "remove" | "unavailable";
 
 export interface ICardPreview extends ICard {
   image: string;
   category: keyof typeof categoryMap;
   description: string;
-  button: TCardButtonState;
+  button: string;
+  buttonDisabled: boolean;
+}
+
+export interface ICardPreviewActions {
+  onClick: () => void;
 }
 
 export class CardPreview extends Card<ICardPreview> {
@@ -17,8 +19,8 @@ export class CardPreview extends Card<ICardPreview> {
   protected descriptionElement: HTMLElement;
   protected buttonElement: HTMLButtonElement;
 
-  constructor(container: HTMLElement, events: IEvents) {
-    super(container, events);
+  constructor(container: HTMLElement, actions: ICardPreviewActions) {
+    super(container);
 
     this.imageElement = container.querySelector(
       ".card__image",
@@ -36,9 +38,7 @@ export class CardPreview extends Card<ICardPreview> {
       ".card__button",
     ) as HTMLButtonElement;
 
-    this.buttonElement.addEventListener("click", () => {
-      this.events.emit("card:button-click", { id: this._id });
-    });
+    this.buttonElement.addEventListener("click", actions.onClick);
   }
 
   set image(value: string) {
@@ -54,16 +54,11 @@ export class CardPreview extends Card<ICardPreview> {
     this.descriptionElement.textContent = value;
   }
 
-  set button(state: TCardButtonState) {
-    if (state === "buy") {
-      this.buttonElement.textContent = "Купить";
-      this.buttonElement.disabled = false;
-    } else if (state === "remove") {
-      this.buttonElement.textContent = "Удалить из корзины";
-      this.buttonElement.disabled = false;
-    } else {
-      this.buttonElement.textContent = "Недоступно";
-      this.buttonElement.disabled = true;
-    }
+  set button(text: string) {
+    this.buttonElement.textContent = text;
+  }
+
+  set buttonDisabled(value: boolean) {
+    this.buttonElement.disabled = value;
   }
 }

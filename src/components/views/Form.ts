@@ -46,8 +46,4 @@ export abstract class Form<T extends IForm> extends Component<T> {
   set errors(text: string) {
     this.errorsElement.textContent = text;
   }
-
-  clear(): void {
-    this.form.reset();
-  }
 }

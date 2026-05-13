@@ -1,5 +1,4 @@
 import { Card, ICard } from "./Card";
-import { IEvents } from "../base/Events";
 import { categoryMap } from "../../utils/constants";
 
 export interface ICardCatalog extends ICard {
@@ -7,12 +6,16 @@ export interface ICardCatalog extends ICard {
   category: keyof typeof categoryMap;
 }
 
+export interface ICardCatalogActions {
+  onClick: () => void;
+}
+
 export class CardCatalog extends Card<ICardCatalog> {
   protected imageElement: HTMLImageElement;
   protected categoryElement: HTMLElement;
 
-  constructor(container: HTMLElement, events: IEvents) {
-    super(container, events);
+  constructor(container: HTMLElement, actions: ICardCatalogActions) {
+    super(container);
 
     this.imageElement = container.querySelector(
       ".card__image",
@@ -21,9 +24,7 @@ export class CardCatalog extends Card<ICardCatalog> {
       ".card__category",
     ) as HTMLElement;
 
-    this.container.addEventListener("click", () => {
-      this.events.emit("card:select", { id: this._id });
-    });
+    this.container.addEventListener("click", actions.onClick);
   }
 
   set image(value: string) {
