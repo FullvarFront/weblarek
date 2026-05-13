@@ -17,7 +17,7 @@ export class CardBasket<T> extends Card<T> {
     ) as HTMLButtonElement;
 
     this.deleteButton.addEventListener("click", () => {
-      this.events.emit("basket-remove", { id: this._id });
+      this.events.emit("basket:remove", { id: this._id });
     });
   }
 
